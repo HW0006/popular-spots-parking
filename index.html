@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="color-scheme" content="light dark"/>
+<meta name="theme-color" content="#1c2e14"/>
+<link rel="icon" href="data:,"/>
+<title>Popular Spots Parking — 熱門地點停車追蹤</title>
+<style>
+:root{
+  --bg:#f4eef0; --card:#fffcfd; --ink:#1c2e14; --muted:#57655f; --line:#ddd0d6;
+  --teal:#1c2e14; --teal2:#374971; --purple:#72668a; --sage:#707978; --pink:#cfb9c2;
+  --amber:#6d5a94; --amber-bg:#ece7f2;
+  --green:#2e6b1e; --green-bg:#e4efdb; --red:#b42318; --red-bg:#fdecea;
+  --yellow-bg:#f3e9f0; --chip:#eadfe4; --btn:#1c2e14; --banner:#374971;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#131a10; --card:#1e2822; --ink:#f2ecef; --muted:#aebbb2; --line:#39443a;
+  --teal:#cfb9c2; --teal2:#a9bde0; --purple:#b3a6c9; --sage:#9fb3ae; --pink:#cfb9c2;
+  --amber:#c3b4dd; --amber-bg:#2f2a3d;
+  --green:#a9d18c; --green-bg:#243618; --red:#ff9a8f; --red-bg:#3d1f1c;
+  --yellow-bg:#38303e; --chip:#2c362c; --btn:#cfb9c2; --banner:#374971; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next",system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.55}
+a{color:var(--teal2)}
+.wrap{max-width:1060px;margin:0 auto;padding:20px 16px 48px}
+.hero{padding:8px 0 4px}
+.hero h1{font-size:28px;line-height:1.2;margin:0;letter-spacing:-.02em}
+.hero h1 span{display:block;font-size:20px;font-weight:600;color:var(--muted);margin-top:4px}
+.lede{font-size:15px;color:var(--muted);margin:10px 0 0;max-width:680px}
+.banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--banner);color:#fff;border-radius:14px;padding:14px 16px;margin:16px 0 0}
+.banner p{margin:0;font-size:14px;max-width:680px}
+.banner a{background:#fff;color:#374971;font-weight:700;text-decoration:none;padding:10px 14px;border-radius:10px;min-height:40px;display:inline-flex;align-items:center}
+.howto{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--muted);margin:14px 0 0}
+.howto strong{color:var(--ink)}
+.controls{position:sticky;top:0;background:var(--bg);padding:14px 0 10px;z-index:5}
+.search{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:16px;min-height:48px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 13px;border-radius:999px;font-size:14px;cursor:pointer;min-height:40px}
+.tab[aria-pressed="true"]{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:700}
+@media (prefers-color-scheme: dark){.tab[aria-pressed="true"]{color:#131a10}}
+.count{font-size:13px;color:var(--muted);margin:4px 0 12px}
+.notice{display:none;background:var(--red-bg);color:var(--red);border-radius:10px;padding:10px 12px;font-size:14px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+@media(min-width:960px){.grid{grid-template-columns:1fr 1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.city{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--purple)}
+.card h2{font-size:18px;line-height:1.3;margin:0}
+.card h2 .zh{display:block;font-size:15px;font-weight:600;color:var(--muted);margin-top:2px}
+.addr{font-size:13px;color:var(--muted);margin:0}
+.badge{display:inline-block;align-self:flex-start;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px}
+.b-free{background:var(--green-bg);color:var(--green)} .b-paid{background:var(--amber-bg);color:var(--amber)}
+.about{font-size:14px;margin:0}
+.about-zh{font-size:14px;color:var(--muted);margin:-6px 0 0}
+.meta{font-size:14px;display:grid;gap:6px}
+.meta div{display:flex;gap:8px}
+.meta dt{flex:0 0 74px;color:var(--muted);font-size:13px}
+.meta dd{margin:0;font-weight:600}
+.meta dd span{display:block;font-weight:500;color:var(--muted)}
+.panel{background:var(--bg);border-radius:12px;padding:12px}
+.panel-label{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.panel-src{font-size:12px;color:var(--muted);margin:4px 0 0}
+.panel-live{font-size:14px;font-weight:600;margin:8px 0 0}
+.panel-live span{display:block;font-weight:500;color:var(--muted)}
+.bars-box{display:grid;gap:6px;margin-top:8px}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:13px}
+.bar-hour{width:44px;flex:none;font-weight:700}
+.bars{display:flex;height:14px;align-items:flex-end;gap:3px;flex:none}
+.bars i{display:block;width:10px;border-radius:2px}
+.panel-peak{font-size:13px;color:var(--muted);margin:8px 0 0}
+.panel-peak span{display:block}
+.panel-text{font-size:13px;color:var(--muted);margin:6px 0 0}
+.panel-text span{display:block;margin-top:4px}
+.panel-note{font-size:13px;margin:8px 0 0}
+.panel-note span{display:block;margin-top:4px;color:var(--muted)}
+.srcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.srcbtn{display:inline-flex;min-height:40px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:0 12px;font-size:12.5px;font-weight:700;color:var(--teal2);text-decoration:none}
+.srcbtn span{margin-left:4px;font-weight:500;color:var(--muted)}
+.note{font-size:13.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin:0}
+.note span{display:block;margin-top:4px}
+.extra{font-size:13px;color:var(--muted);margin:0}
+.extra span{display:block;margin-top:2px}
+.sublots{display:grid;gap:8px}
+.sublot{border:1px solid var(--line);border-radius:12px;padding:12px}
+.sublot h3{font-size:14px;margin:0;line-height:1.4}
+.sublot h3 span{display:block;font-size:13px;font-weight:600;color:var(--muted)}
+.sublot p{font-size:13px;color:var(--muted);margin:4px 0 0}
+.sublot p span{display:block}
+.sublot a{display:inline-flex;min-height:40px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:0 12px;margin-top:8px;font-size:13px;font-weight:700;color:var(--teal2);text-decoration:none}
+.status{border-top:1px solid var(--line);padding-top:10px}
+.status-label{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.current{font-size:14px;margin:6px 0 8px;min-height:22px}
+.current .pill{font-weight:800;padding:2px 8px;border-radius:999px}
+.p-lots{background:var(--green-bg);color:var(--green)} .p-few{background:var(--yellow-bg);color:var(--amber)} .p-full{background:var(--red-bg);color:var(--red)}
+.current .rep-note{color:var(--muted);font-size:12.5px;display:block;margin-top:4px}
+.current .rep-note span{display:block}
+.sbtns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.sbtn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:9px 4px;font-size:13px;cursor:pointer;min-height:44px;line-height:1.3}
+.sbtn small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.sbtn:active{transform:scale(.98)}
+.sbtn:disabled{opacity:.5}
+.waze{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--btn);color:var(--bg);text-decoration:none;font-weight:700;padding:12px;border-radius:12px;min-height:48px;font-size:15px;margin-top:auto}
+@media (prefers-color-scheme: light){.waze{color:#fff}}
+.empty{display:none;text-align:center;padding:40px 16px;color:var(--muted)}
+footer{margin-top:28px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+footer p{margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>Popular Spots Parking <span>熱門地點停車追蹤</span></h1>
+    <p class="lede">Where people actually gather around the South Bay — malls, downtowns, and Stanford — with parking prices, free hours, and Tuesday Popular Times.<br>南灣大家真正會去的地方 — 商場、市中心和 Stanford — 停車價格、免費時數和週二熱門時段都在這裡。</p>
+  </header>
+
+  <div class="banner" role="alert">
+    <p><strong>Holiday promo · 假日活動：</strong>Valley Fair garage parking is <strong>FREE until 5 PM, Nov 23–25</strong> (holiday promo). Stanford visitor parking is free after 4 PM on weekdays.<br><strong>假日活動：</strong>Valley Fair 停車場大樓 11 月 23–25 日下午 5 點前免費。Stanford 訪客停車平日下午 4 點後免費。</p>
+    <a href="https://waze.com/ul?ll=37.3259,-121.94378&amp;navigate=yes" target="_blank" rel="noopener" aria-label="Navigate with Waze to Westfield Valley Fair">Waze → Valley Fair</a>
+  </div>
+
+  <p class="howto"><strong>How status works 狀態怎麼來的：</strong>There are no live sensor counts for these lots — the one exception is ParkSJ’s live % full for downtown San Jose garages (see San Pedro Square). Everywhere else, “live status” is crowd reports from the last 30 minutes plus the typical patterns on each card. No counts are ever invented. The last three spots — Los Gatos downtown, downtown Palo Alto, and Stanford visitor parking — were re-checked on Tue Nov 24, 2026 for any real-time busyness feed: none is published online for them (each card explains why and links the official source). One partial exception: Palo Alto’s downtown garages show live spaces-by-level on entrance signs, on site only.<br>這些停車場沒有即時感應計數 — 唯一例外是 ParkSJ 的聖荷西市中心車庫即時滿位 %（見 San Pedro Square）。其他地方的「即時狀態」是最近 30 分鐘大家的回報，加上每張卡上的一般規律。數字絕不捏造。最後三個地點 — Los Gatos 市中心、Palo Alto 市中心、Stanford 訪客停車 — 已在 2026 年 11 月 24 日週二重新查過有沒有即時人潮資料：線上都沒有公布（每張卡都有說明原因並附官方來源連結）。一個部分例外：Palo Alto 市中心車庫入口看板有即時的分層空位，但只能在現場看。</p>
+
+  <div class="controls">
+    <label for="q" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Search spots 搜尋地點</label>
+    <input class="search" id="q" type="search" placeholder="Search a spot… 搜尋地點…" aria-label="Search spots 搜尋地點">
+    <div class="tabs" role="group" aria-label="Filter by price 依價格篩選">
+      <button class="tab" type="button" data-filter="all" aria-pressed="true">All spots · 全部</button>
+      <button class="tab" type="button" data-filter="free" aria-pressed="false">Has free parking · 有免費停車</button>
+      <button class="tab" type="button" data-filter="paid" aria-pressed="false">Paid / mixed · 收費／混合</button>
+    </div>
+  </div>
+
+  <p class="count" id="count"></p>
+  <p class="notice" id="notice" role="alert"></p>
+  <main class="grid" id="grid"></main>
+  <div class="empty" id="empty">No spots match that search. 沒有符合搜尋的地點。</div>
+
+  <footer>
+    <p>Popular Times are Google Search readings from ~1:10 PM on Tue Nov 24, 2026 — a snapshot of a typical Tuesday, not a live feed. Prices and hours can change; Great Mall’s hours especially are worth verifying before you go.</p>
+    <p>熱門時段是 2026 年 11 月 24 日週二約下午 1:10 從 Google 搜尋讀到的資料，是一般週二的快照，不是即時資訊。價格和營業時間可能變動，Great Mall 的時間尤其建議出發前再確認。</p>
+  </footer>
+</div>
+
+<script>
+var SPOTS=[
+  {
+    id: "santana-row",
+    cityEn: "San Jose",
+    cityZh: "聖荷西",
+    nameEn: "Santana Row",
+    nameZh: "Santana Row 桑塔納街",
+    address: "377 Santana Row, San Jose, CA 95128",
+    lat: 37.320794,
+    lng: -122.947969,
+    aboutEn: "50+ shops, 30 restaurants, and the CineArts cinema — the South Bay's big night-out street.",
+    aboutZh: "50 多間店、30 間餐廳，還有 CineArts 電影院，是南灣最熱鬧的夜生活街道。",
+    hoursEn: "Mon–Thu 11 AM–8 PM · Fri–Sat 11 AM–9 PM · Sun 11 AM–7 PM",
+    hoursZh: "週一至四 11 AM–8 PM · 週五六 11 AM–9 PM · 週日 11 AM–7 PM",
+    parkingEn: "Garages + surface lots. First 2 hours free, then $3/hr, $15 daily max. Valet at Hotel Valencia ~$7.",
+    parkingZh: "停車場大樓＋平面停車場。前 2 小時免費，之後 $3/小時，每日上限 $15。Hotel Valencia 代客停車約 $7。",
+    priceKind: "mixed",
+    priceBadgeEn: "2 hrs free",
+    priceBadgeZh: "前 2 小時免費",
+    tipEn: "Weekend evenings fill up. When the main garage is full, the Winchester-side garages usually still have space.",
+    tipZh: "週末晚上會滿。主車庫滿的時候，Winchester 那一側的車庫通常還有位子。",
+    stayEn: "Typical stay 45 min – 4 hrs",
+    stayZh: "平均停留 45 分鐘 – 4 小時",
+    liveEn: "Live ~1:10 PM Tue: “Not too busy”",
+    liveZh: "週二約下午 1:10 即時：「不太忙」",
+    bars: [
+      { hour: "6 PM", labelEn: "Usually a little busy", labelZh: "通常有點忙", level: 3 },
+      { hour: "7 PM", labelEn: "Usually a little busy — Tue peak", labelZh: "通常有點忙 — 週二高峰", level: 4 },
+      { hour: "8 PM", labelEn: "Closes 8 PM — no bar", labelZh: "8 點打烊 — 無資料", level: 0 },
+    ],
+    peakEn: "11 AM–5 PM all “not too busy”. Tuesday peak is 7 PM.",
+    peakZh: "上午 11 點到下午 5 點都是「不太忙」。週二高峰是晚上 7 點。",
+  },
+  {
+    id: "valley-fair",
+    cityEn: "Santa Clara",
+    cityZh: "聖塔克拉拉",
+    nameEn: "Westfield Valley Fair",
+    nameZh: "Westfield Valley Fair 購物中心",
+    address: "2855 Stevens Creek Blvd, Santa Clara, CA 95050",
+    lat: 37.3259,
+    lng: -121.94378,
+    aboutEn: "The busiest mall in the South Bay, right across Stevens Creek from Santana Row.",
+    aboutZh: "南灣最忙的購物中心，就在 Santana Row 對街。",
+    hoursEn: "Closes 9 PM",
+    hoursZh: "晚上 9 點打烊",
+    parkingEn: "Garages + lots. First 1 hour free, then $2/hr, $15 daily max. Preferred lot near the Main Entrance (Dorsich Ave from Winchester) is a flat $25, 11 AM–10 PM. Valet on the south side by King's Fish House. EV charging: Winchester Garage L1, Monroe Garage L1–2.",
+    parkingZh: "停車場大樓＋停車場。前 1 小時免費，之後 $2/小時，每日上限 $15。主入口旁的 Preferred 停車場（從 Winchester 走 Dorsich Ave）一律 $25，11 AM–10 PM。南側 King's Fish House 旁有代客停車。電動車充電：Winchester 車庫 1 樓、Monroe 車庫 1–2 樓。",
+    priceKind: "mixed",
+    priceBadgeEn: "1 hr free",
+    priceBadgeZh: "前 1 小時免費",
+    tipEn: "Holiday promo: garage parking is FREE Mon Nov 23 – Wed Nov 25 until 5 PM (the mall's own posts).",
+    tipZh: "假日活動：11 月 23 日（週一）至 25 日（週三）下午 5 點前，停車場大樓免費（商場官方公告）。",
+    stayEn: "Typical stay 45 min – 3 hrs",
+    stayZh: "平均停留 45 分鐘 – 3 小時",
+    liveEn: "Live 1 PM Tue: “A little busy” — the tallest bar of the day",
+    liveZh: "週二下午 1 點即時：「有點忙」— 是當天最高的長條",
+    bars: [
+      { hour: "6 PM", labelEn: "Usually a little busy", labelZh: "通常有點忙", level: 3 },
+      { hour: "7 PM", labelEn: "Usually a little busy — evening peak", labelZh: "通常有點忙 — 晚上高峰", level: 4 },
+      { hour: "8 PM", labelEn: "Usually not too busy", labelZh: "通常不太忙", level: 2 },
+    ],
+    peakEn: "Evening peak is 7 PM; things ease off by 8 PM.",
+    peakZh: "晚上高峰是 7 點，8 點開始緩和。",
+  },
+  {
+    id: "san-pedro",
+    cityEn: "San Jose · Downtown",
+    cityZh: "聖荷西 · 市中心",
+    nameEn: "San Pedro Square Market",
+    nameZh: "San Pedro Square 美食廣場",
+    address: "87 N San Pedro St, San Jose, CA 95110",
+    lat: 37.33651,
+    lng: -121.89432,
+    aboutEn: "Downtown's food hall with live music most days.",
+    aboutZh: "市中心的美食廣場，大部分日子有現場音樂。",
+    hoursEn: "Closes 10 PM",
+    hoursZh: "晚上 10 點打烊",
+    parkingEn: "Market & San Pedro Square Garage, 45 N Market St — 90 minutes free, then paid.",
+    parkingZh: "Market & San Pedro Square 停車場，45 N Market St — 前 90 分鐘免費，之後收費。",
+    priceKind: "mixed",
+    priceBadgeEn: "90 min free",
+    priceBadgeZh: "前 90 分鐘免費",
+    tipEn: "This is the one spot with a real live source: ParkSJ publishes live % full for downtown San Jose garages — check it before you go.",
+    tipZh: "這是唯一有真正即時來源的地點：ParkSJ 有聖荷西市中心停車場的即時滿位百分比，出發前可以先看。",
+    stayEn: "Typical stay 30 min – 2 hrs",
+    stayZh: "平均停留 30 分鐘 – 2 小時",
+    liveEn: "Live Tue: “Not too busy”",
+    liveZh: "週二即時：「不太忙」",
+    bars: [
+      { hour: "6 PM", labelEn: "Usually not too busy", labelZh: "通常不太忙", level: 3 },
+      { hour: "7 PM", labelEn: "Usually not too busy — peak", labelZh: "通常不太忙 — 高峰", level: 4 },
+      { hour: "8 PM", labelEn: "Usually not too busy", labelZh: "通常不太忙", level: 3 },
+      { hour: "9 PM", labelEn: "Usually not too busy", labelZh: "通常不太忙", level: 2 },
+    ],
+    peakEn: "Tuesday peak is 7 PM, but even the peak reads “not too busy”.",
+    peakZh: "週二高峰是晚上 7 點，但連高峰都只是「不太忙」。",
+    subLots: [
+      {
+        nameEn: "Market & San Pedro Square Garage",
+        nameZh: "Market & San Pedro Square 停車場",
+        noteEn: "45 N Market St · 90 min free, then paid · ParkSJ live % full",
+        noteZh: "45 N Market St · 前 90 分鐘免費，之後收費 · ParkSJ 有即時滿位 %",
+        lat: 37.33686,
+        lng: -121.89418,
+        wazeLabel: "Garage 車庫",
+      },
+    ],
+  },
+  {
+    id: "great-mall",
+    cityEn: "Milpitas",
+    cityZh: "苗必達",
+    nameEn: "Great Mall",
+    nameZh: "Great Mall 大型暢貨中心",
+    address: "447 Great Mall Dr, Milpitas, CA 95035",
+    lat: 37.41143,
+    lng: -121.89301,
+    aboutEn: "The largest outlet mall in Northern California, with 200+ stores.",
+    aboutZh: "北加州最大的暢貨中心，200 多間店。",
+    hoursEn: "Google showed closes 8 PM tonight (Tue Nov 24); the mall's typical hours are 10 AM–9 PM — verify before going.",
+    hoursZh: "Google 顯示今晚（週二 11/24）8 點打烊；商場平常營業時間是 10 AM–9 PM — 出發前請再確認。",
+    parkingEn: "Free large lots, plus a covered parking structure. Milpitas BART station is nearby.",
+    parkingZh: "免費大型停車場，另有有頂停車場大樓。附近有 Milpitas BART 站。",
+    priceKind: "free",
+    priceBadgeEn: "Free parking",
+    priceBadgeZh: "免費停車",
+    tipEn: "Weekends get busy — arrive early for the lots closest to the entrances.",
+    tipZh: "週末人多，想停離入口近一點的位子要早點到。",
+    stayEn: "Typical stay 30 min – 2.5 hrs",
+    stayZh: "平均停留 30 分鐘 – 2.5 小時",
+    liveEn: "Live 1 PM Tue: “A little busy” — the tallest bar of the day",
+    liveZh: "週二下午 1 點即時：「有點忙」— 是當天最高的長條",
+    bars: [
+      { hour: "6 PM", labelEn: "Usually not too busy — peak", labelZh: "通常不太忙 — 高峰", level: 4 },
+      { hour: "7 PM", labelEn: "Usually not too busy", labelZh: "通常不太忙", level: 3 },
+    ],
+    peakEn: "Tuesday evening peak is 6 PM.",
+    peakZh: "週二晚上高峰是 6 點。",
+  },
+  {
+    id: "stanford-shopping",
+    cityEn: "Palo Alto",
+    cityZh: "帕羅奧圖",
+    nameEn: "Stanford Shopping Center",
+    nameZh: "Stanford 購物中心",
+    address: "660 Stanford Shopping Ctr, Palo Alto, CA 94304",
+    lat: 37.44161,
+    lng: -122.17144,
+    aboutEn: "Open-air mall next to Stanford — the one Valley Fair shoppers keep comparing prices against.",
+    aboutZh: "Stanford 旁邊的露天購物中心，也是 Valley Fair 客人最常拿來比價的那間。",
+    hoursEn: "Closes 7 PM",
+    hoursZh: "晚上 7 點打烊",
+    parkingEn: "Free open-air parking lots all around the center.",
+    parkingZh: "商場四周都是免費的露天停車場。",
+    priceKind: "free",
+    priceBadgeEn: "Free parking",
+    priceBadgeZh: "免費停車",
+    tipEn: "It closes at 7 PM, so there are no evening bars after that — the last busy hour is 6 PM.",
+    tipZh: "它 7 點就打烊，所以之後沒有晚上的資料 — 最後一個忙碌時段是 6 點。",
+    stayEn: "Typical stay 20 min – 2 hrs",
+    stayZh: "平均停留 20 分鐘 – 2 小時",
+    liveEn: "Live 1 PM Tue: “A little busy” — the tallest bar of the day",
+    liveZh: "週二下午 1 點即時：「有點忙」— 是當天最高的長條",
+    bars: [
+      { hour: "6 PM", labelEn: "Usually a little busy — last bar", labelZh: "通常有點忙 — 最後一格", level: 3 },
+    ],
+    peakEn: "Tuesday peak is 5 PM.",
+    peakZh: "週二高峰是下午 5 點。",
+  },
+  {
+    id: "los-gatos",
+    cityEn: "Los Gatos",
+    cityZh: "洛斯加托斯",
+    nameEn: "Los Gatos Downtown",
+    nameZh: "Los Gatos 市中心",
+    address: "Main St area, Los Gatos, CA",
+    lat: 37.22428,
+    lng: -121.97839,
+    aboutEn: "Small-town main street of cafés and shops. Six downtown public lots are free for 3 hours Mon–Sat 9 AM–6 PM; street parking is 2 hours.",
+    aboutZh: "小鎮主街，有咖啡店和商店。市中心六個公共停車場週一至六 9 AM–6 PM 免費 3 小時；路邊停車 2 小時。",
+    hoursEn: "Shops vary — an evening stroll spot",
+    hoursZh: "各店時間不同 — 適合晚上散步",
+    parkingEn: "Three public lots below — pick the one that fits your stay.",
+    parkingZh: "下面三個公共停車場 — 依停留時間挑一個。",
+    priceKind: "free",
+    priceBadgeEn: "Free lots",
+    priceBadgeZh: "免費停車場",
+    tipEn: "Northside Lot is free all day and best for long stays. The Library Lot is only 90 minutes, and only Mon–Fri 8 AM–5 PM.",
+    tipZh: "Northside 停車場全天免費，最適合久停。圖書館停車場只有 90 分鐘，而且只限週一至五 8 AM–5 PM。",
+    stayEn: "Stays vary — dinner plus a stroll is common",
+    stayZh: "停留時間不一 — 吃晚餐加散步最常見",
+    noPanelEn: "No real-time busyness feed exists for this area — re-checked Tue Nov 24, 2026. Google only publishes Popular Times for single venues with enough visits, not for a whole downtown area, and the Town of Los Gatos publishes a parking map and FAQs only — no live space counts. The live signal here is the crowd reports below.",
+    noPanelZh: "這一區沒有即時人潮資料 — 2026 年 11 月 24 日週二重新確認過。Google 只為有足夠造訪量的單一商家發布熱門時段，不會為整個市中心區域發布；Los Gatos 鎮公所也只提供停車地圖和常見問題，沒有即時空位數字。這裡的即時訊號就是下面的大家回報。",
+    liveNoteEn: "What you can check instead: the Town's official parking map shows every downtown lot and its time limits before you go.",
+    liveNoteZh: "可以改看這個：鎮公所的官方停車地圖有市中心每個停車場和時間限制，出發前先看。",
+    sources: [
+      {
+        labelEn: "Town of Los Gatos — Parking FAQs & map",
+        labelZh: "Los Gatos 鎮公所 — 停車常見問題與地圖",
+        url: "http://www.losgatosca.gov/3013/Parking-FAQs",
+      },
+      {
+        labelEn: "Google — how Popular Times data works",
+        labelZh: "Google — 熱門時段資料怎麼來的",
+        url: "https://support.google.com/business/answer/6263531?hl=en&ref_topic=11498073",
+      },
+    ],
+    subLots: [
+      {
+        nameEn: "Northside Lot",
+        nameZh: "Northside 停車場",
+        noteEn: "140 Los Gatos–Saratoga Rd · Free all day · Best for long stays",
+        noteZh: "140 Los Gatos–Saratoga Rd · 全天免費 · 最適合久停",
+        lat: 37.22856,
+        lng: -121.97978,
+        wazeLabel: "Northside",
+      },
+      {
+        nameEn: "Miles Avenue Lot",
+        nameZh: "Miles Avenue 停車場",
+        noteEn: "Miles Ave · Free all day",
+        noteZh: "Miles Ave · 全天免費",
+        lat: 37.22428,
+        lng: -121.97839,
+        wazeLabel: "Miles Ave",
+      },
+      {
+        nameEn: "Los Gatos Library Lot",
+        nameZh: "Los Gatos 圖書館停車場",
+        noteEn: "100 Villa Ave · Free · 90-min max, Mon–Fri 8 AM–5 PM only",
+        noteZh: "100 Villa Ave · 免費 · 最多 90 分鐘，僅週一至五 8 AM–5 PM",
+        lat: 37.21999,
+        lng: -121.97773,
+        wazeLabel: "Library Lot 圖書館",
+      },
+    ],
+  },
+  {
+    id: "palo-alto-downtown",
+    cityEn: "Palo Alto · Downtown",
+    cityZh: "帕羅奧圖 · 市中心",
+    nameEn: "Downtown Palo Alto (University Ave)",
+    nameZh: "Palo Alto 市中心（University Ave）",
+    address: "University Ave area, Palo Alto, CA",
+    lat: 37.446395,
+    lng: -122.162277,
+    aboutEn: "The University Ave strip — Pizza My Heart, Patagonia, Whole Foods. Street parking here is the hard part: mostly 2 hours, plus color-zone rules.",
+    aboutZh: "University Ave 一帶 — Pizza My Heart、Patagonia、Whole Foods 都在這裡。這裡最難的是路邊停車：大多 2 小時，還有顏色分區規定。",
+    hoursEn: "Shops and restaurants vary — busiest at lunch and dinner",
+    hoursZh: "店家和餐廳時間不一 — 午餐和晚餐時段最熱鬧",
+    parkingEn: "Skip the street hunt: all three downtown garages below are FREE for 3 hours. Enforcement Mon–Fri 8 AM–5 PM.",
+    parkingZh: "不要在路邊繞了：下面三個市中心停車場都免費 3 小時。執法時間週一至五 8 AM–5 PM。",
+    priceKind: "free",
+    priceBadgeEn: "Garages free 3 hrs",
+    priceBadgeZh: "車庫免費 3 小時",
+    tipEn: "Webster / Cowper Garage is often easier than Bryant / Lytton. Your screenshot pin sits right between the two.",
+    tipZh: "Webster / Cowper 車庫通常比 Bryant / Lytton 好停。你截圖釘的位置就在這兩個中間。",
+    stayEn: "Garage limit 3 hrs free — enough for dinner and a movie",
+    stayZh: "車庫免費 3 小時 — 吃晚餐加看電影夠用",
+    noPanelEn: "No online real-time busyness feed exists for this area — re-checked Tue Nov 24, 2026. Google publishes no Popular Times panel for the University Ave area, and the City publishes no online live counts. The live signal here before you go is the crowd reports below.",
+    noPanelZh: "這一區沒有線上的即時人潮資料 — 2026 年 11 月 24 日週二重新確認過。Google 沒有為 University Ave 這一區發布熱門時段，市政府也沒有公布線上即時空位。出發前能看的即時訊號就是下面的大家回報。",
+    liveNoteEn: "Real-time data does exist — but only on site: since early 2025 all four downtown garages (including Bryant/Lytton, Cowper/Webster, and Civic Center below) have an automated parking guidance system with camera sensors and a digital sign at the entrance showing open spaces by level. You see it when you arrive, not from home.",
+    liveNoteZh: "即時資料其實有 — 但只在現場：從 2025 年初起，四個市中心車庫（包含下面的 Bryant/Lytton、Cowper/Webster 和 Civic Center）都裝了自動停車導引系統，有攝影機感應器，入口的電子看板會顯示每一層還有多少空位。是到了才看得到，在家裡查不到。",
+    sources: [
+      {
+        labelEn: "City of Palo Alto — Parking",
+        labelZh: "Palo Alto 市政府 — 停車資訊",
+        url: "https://www.cityofpaloalto.org/Departments/Transportation/Parking",
+      },
+      {
+        labelEn: "Palo Alto Online — garages' guidance-system upgrade",
+        labelZh: "Palo Alto Online — 車庫導引系統升級報導",
+        url: "https://www.paloaltoonline.com/transportation/2024/07/23/palo-alto-garages-to-get-long-awaited-tech-upgrade/",
+      },
+    ],
+    subLots: [
+      {
+        nameEn: "Bryant / Lytton Garage",
+        nameZh: "Bryant / Lytton 車庫",
+        noteEn: "445 Bryant St · Free 3 hrs",
+        noteZh: "445 Bryant St · 免費 3 小時",
+        lat: 37.446395,
+        lng: -122.162277,
+        wazeLabel: "Bryant",
+      },
+      {
+        nameEn: "Webster / Cowper Garage",
+        nameZh: "Webster / Cowper 車庫",
+        noteEn: "520 Webster St · Free 3 hrs · Often easier than Bryant",
+        noteZh: "520 Webster St · 免費 3 小時 · 通常比 Bryant 好停",
+        lat: 37.44886,
+        lng: -122.15794,
+        wazeLabel: "Webster",
+      },
+      {
+        nameEn: "Civic Center Garage",
+        nameZh: "市政中心車庫",
+        noteEn: "250 Hamilton Ave · Free 3 hrs",
+        noteZh: "250 Hamilton Ave · 免費 3 小時",
+        lat: 37.44421,
+        lng: -122.15978,
+        wazeLabel: "Civic Center",
+      },
+    ],
+  },
+  {
+    id: "stanford-visitor",
+    cityEn: "Stanford",
+    cityZh: "史丹佛",
+    nameEn: "Stanford Visitor Parking",
+    nameZh: "Stanford 訪客停車",
+    address: "Visitor Center, 295 Galvez St, Stanford, CA 94305",
+    lat: 37.43149,
+    lng: -122.16398,
+    aboutEn: "Visitor parking across campus, all paid through ParkMobile — look for the green signs with zone numbers. There are no meters or pay stations.",
+    aboutZh: "校園各處的訪客停車，全部用 ParkMobile 付費 — 找綠色牌子上的區域編號。沒有咪錶，也沒有繳費機。",
+    hoursEn: "Visitor Center closes 5 PM · Parking enforced Mon–Fri 8 AM–4 PM",
+    hoursZh: "訪客中心下午 5 點關門 · 停車執法週一至五 8 AM–4 PM",
+    parkingEn: "$4.46/hr or $35.68/day via ParkMobile, plus a $0.40 ParkMobile fee per payment. Pay in full upfront — it's non-refundable. FREE after 4 PM on weekdays and all day on weekends.",
+    parkingZh: "用 ParkMobile 付費 $4.46/小時或 $35.68/天，每次付款另加 $0.40 手續費。要先付清全額，不退費。平日下午 4 點後和週末全天免費。",
+    priceKind: "paid",
+    priceBadgeEn: "ParkMobile paid",
+    priceBadgeZh: "ParkMobile 收費",
+    tipEn: "Coming after 4 PM on a weekday, or any time on a weekend? Parking is free — no ParkMobile needed.",
+    tipZh: "平日下午 4 點後來，或週末任何時間來？停車免費，不用 ParkMobile。",
+    stayEn: "Pay by the hour or take the $35.68 day rate",
+    stayZh: "可以按小時付，或用 $35.68 的全天價",
+    noPanelEn: "No real-time busyness or space-count feed exists for Stanford visitor parking — re-checked Tue Nov 24, 2026. Google publishes no Popular Times graph for the Visitor Center, and Stanford Transportation publishes locations and ParkMobile zone numbers only — no live availability. ParkMobile is payment only: paying in advance does not guarantee a space. The live signal here is the crowd reports below.",
+    noPanelZh: "Stanford 訪客停車沒有即時人潮或空位資料 — 2026 年 11 月 24 日週二重新確認過。Google 沒有為訪客中心發布熱門時段圖表，Stanford 交通部門也只公布停車位置和 ParkMobile 區域編號，沒有即時空位。ParkMobile 只是付款工具：先付錢不保證有位子。這裡的即時訊號就是下面的大家回報。",
+    liveNoteEn: "What you can check instead: Stanford's official parking pages list every visitor area with its zone number, paid hours, and restrictions — and remember enforcement ends at 4 PM on weekdays, after which parking is free.",
+    liveNoteZh: "可以改看這個：Stanford 官方停車頁面有每個訪客停車區的區域編號、收費時段和限制 — 另外記得平日執法只到下午 4 點，之後停車免費。",
+    sources: [
+      {
+        labelEn: "Stanford Transportation — Parking at Stanford",
+        labelZh: "Stanford 交通部門 — 校園停車",
+        url: "https://transportation.stanford.edu/parking-stanford",
+      },
+    ],
+    extraEn: "Note: Stanford hospital garages have separate rates — Pasteur Visitor Garage is free for the first 2 hrs, then capped at $18/day.",
+    extraZh: "注意：Stanford 醫院的停車場是另外的費率 — Pasteur 訪客車庫前 2 小時免費，之後每日上限 $18。",
+    subLots: [
+      {
+        nameEn: "Wilbur Field Garage · Zone 7206",
+        nameZh: "Wilbur Field 車庫 · 區域 7206",
+        noteEn: "Wilbur Way · ParkMobile zone 7206",
+        noteZh: "Wilbur Way · ParkMobile 區域 7206",
+        lat: 37.42279,
+        lng: -122.16316,
+        wazeLabel: "Wilbur 7206",
+      },
+      {
+        nameEn: "Via Ortega Garage · Zone 7202",
+        nameZh: "Via Ortega 車庫 · 區域 7202",
+        noteEn: "498 Via Ortega · ParkMobile zone 7202",
+        noteZh: "498 Via Ortega · ParkMobile 區域 7202",
+        wazeLabel: "Via Ortega 7202",
+      },
+      {
+        nameEn: "Tresidder Lot · Zone 7239",
+        nameZh: "Tresidder 停車場 · 區域 7239",
+        noteEn: "Tresidder Memorial Union · ParkMobile zone 7239",
+        noteZh: "Tresidder Memorial Union · ParkMobile 區域 7239",
+        wazeLabel: "Tresidder 7239",
+      },
+      {
+        nameEn: "Knight Management Center Garage · Zone 7207",
+        nameZh: "Knight 管理中心車庫 · 區域 7207",
+        noteEn: "Graduate School of Business · ParkMobile zone 7207",
+        noteZh: "商學院研究所 · ParkMobile 區域 7207",
+        wazeLabel: "Knight 7207",
+      },
+      {
+        nameEn: "Parking Structure 1",
+        nameZh: "停車場大樓 1",
+        noteEn: "Roth Way & Campus Drive · Visitor spaces",
+        noteZh: "Roth Way 與 Campus Drive · 訪客車位",
+        wazeLabel: "PS 1",
+      },
+      {
+        nameEn: "Lomita Drive visitor spaces",
+        nameZh: "Lomita Drive 訪客車位",
+        noteEn: "Near Cantor Arts Center · Visitor spaces",
+        noteZh: "Cantor 藝術中心附近 · 訪客車位",
+        wazeLabel: "Lomita",
+      },
+      {
+        nameEn: "Visitor Center Lot",
+        nameZh: "訪客中心停車場",
+        noteEn: "295 Galvez St · Right at the Visitor Center",
+        noteZh: "295 Galvez St · 就在訪客中心旁",
+        lat: 37.43149,
+        lng: -122.16398,
+        wazeLabel: "Visitor Center 訪客中心",
+      },
+    ],
+  },
+];
+var KEY="popular-spots-parking-reports-v1";
+var SB_URL="https://kamzpeesnzsgxqvqrrlf.supabase.co/rest/v1/reports";
+var SB_KEY="sb_publishable_DXz553W6FhLOpilGtWp-Pg_TiChluNz";
+var shared={};
+var reportsState="loading";
+var filter="all";
+var noticeText=null;
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function wazeHref(lat,lng){return "https://waze.com/ul?ll="+lat+","+lng+"&navigate=yes";}
+function loadReports(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){return{}}}
+function saveLocal(id,status){var r=loadReports();r[id]={s:status,t:Date.now()};try{localStorage.setItem(KEY,JSON.stringify(r))}catch(e){}}
+function localReport(id){var r=loadReports()[id];if(!r)return null;if(Date.now()-r.t>30*60*1000)return null;return r;}
+function bestReport(id){
+  if(shared[id])return{s:shared[id].s,t:shared[id].t,shared:true};
+  var l=localReport(id);
+  if(l)return{s:l.s,t:l.t,shared:false};
+  return null;
+}
+function sbHeaders(extra){var h={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY};if(extra)for(var k in extra)h[k]=extra[k];return h;}
+function fetchReports(){
+  var since=new Date(Date.now()-30*60*1000).toISOString();
+  var url=SB_URL+"?select=lot_id,status,created_at&created_at=gt."+encodeURIComponent(since)+"&order=created_at.desc&limit=500";
+  fetch(url,{headers:sbHeaders()}).then(function(res){
+    if(!res.ok)throw new Error("fetch "+res.status);
+    return res.json();
+  }).then(function(rows){
+    var m={};
+    for(var i=0;i<rows.length;i++){var row=rows[i];if(!m[row.lot_id])m[row.lot_id]={s:row.status,t:Date.parse(row.created_at)};}
+    shared=m;reportsState="ok";render();
+  }).catch(function(){reportsState="error";render();});
+}
+function postReport(id,status){
+  saveLocal(id,status);
+  render();
+  fetch(SB_URL,{method:"POST",headers:sbHeaders({"Content-Type":"application/json","Prefer":"return=minimal"}),body:JSON.stringify({lot_id:id,status:status})}).then(function(res){
+    if(!res.ok)throw new Error("post "+res.status);
+    shared[id]={s:status,t:Date.now()};
+    noticeText=null;
+    render();
+    fetchReports();
+  }).catch(function(){
+    noticeText="Couldn't save that report — it's kept on this device only, please try again. 無法儲存回報，目前只存在這台裝置上，請再試一次。";
+    render();
+  });
+}
+function timeAgo(t){
+  var m=Math.max(0,Math.floor((Date.now()-t)/60000));
+  if(m<=0)return "just now · 剛剛";
+  if(m===1)return "1 min ago · 1 分鐘前";
+  return m+" min ago · "+m+" 分鐘前";
+}
+var STATUS_META={
+  lots:{en:"Lots of spots",zh:"位子很多",cls:"p-lots"},
+  few:{en:"Few left",zh:"快滿了",cls:"p-few"},
+  full:{en:"Full",zh:"已滿",cls:"p-full"}
+};
+function barColor(level){
+  if(level>=4)return "var(--red)";
+  if(level===3)return "var(--amber)";
+  return "var(--green)";
+}
+function barsHtml(bars){
+  var out='<div class="bars-box">';
+  bars.forEach(function(bar){
+    out+='<div class="bar-row"><span class="bar-hour">'+esc(bar.hour)+'</span><span class="bars" aria-hidden="true">';
+    for(var n=1;n<=4;n++){
+      var h=4+n*3;
+      var c=n<=bar.level?barColor(bar.level):"var(--line)";
+      out+='<i style="height:'+h+'px;background:'+c+'"></i>';
+    }
+    out+='</span><span>'+esc(bar.labelEn)+'<span style="color:var(--muted)"> · '+esc(bar.labelZh)+'</span></span></div>';
+  });
+  return out+'</div>';
+}
+function panelHtml(spot){
+  if(!(spot.liveEn||spot.bars||spot.peakEn))return "";
+  var out='<div class="panel"><p class="panel-label">Tue Popular Times · 週二熱門時段</p>'+
+    '<p class="panel-src">Google Search, read ~1:10 PM Tue Nov 24 · Google 搜尋，週二約下午 1:10 讀取</p>';
+  if(spot.liveEn)out+='<p class="panel-live">'+esc(spot.liveEn)+'<span>'+esc(spot.liveZh||"")+'</span></p>';
+  if(spot.bars)out+=barsHtml(spot.bars);
+  if(spot.peakEn)out+='<p class="panel-peak">'+esc(spot.peakEn)+'<span>'+esc(spot.peakZh||"")+'</span></p>';
+  return out+'</div>';
+}
+function noPanelHtml(spot){
+  if(!spot.noPanelEn)return "";
+  var out='<div class="panel"><p class="panel-label">Live busyness data · 即時人潮資料</p>'+
+    '<p class="panel-text">'+esc(spot.noPanelEn)+'<span>'+esc(spot.noPanelZh||"")+'</span></p>';
+  if(spot.liveNoteEn)out+='<p class="panel-note">'+esc(spot.liveNoteEn)+'<span>'+esc(spot.liveNoteZh||"")+'</span></p>';
+  if(spot.sources){
+    out+='<div class="srcs">';
+    spot.sources.forEach(function(s){
+      out+='<a class="srcbtn" href="'+esc(s.url)+'" target="_blank" rel="noopener" aria-label="'+esc(s.labelEn)+' (opens in new tab)">'+esc(s.labelEn)+' ↗<span>'+esc(s.labelZh)+'</span></a>';
+    });
+    out+='</div>';
+  }
+  return out+'</div>';
+}
+function subLotsHtml(spot){
+  if(!spot.subLots)return "";
+  var out='<div class="sublots"><p class="panel-label">Parking options · 停車選擇</p>';
+  spot.subLots.forEach(function(lot){
+    out+='<div class="sublot"><h3>'+esc(lot.nameEn)+'<span>'+esc(lot.nameZh)+'</span></h3>'+
+      '<p>'+esc(lot.noteEn)+'<span>'+esc(lot.noteZh)+'</span></p>';
+    if(typeof lot.lat==="number"&&typeof lot.lng==="number"){
+      out+='<a href="'+esc(wazeHref(lot.lat,lot.lng))+'" target="_blank" rel="noopener" aria-label="Navigate with Waze to '+esc(lot.nameEn)+'">Waze · '+esc(lot.wazeLabel)+'</a>';
+    }
+    out+='</div>';
+  });
+  return out+'</div>';
+}
+function reportHtml(spot){
+  var rep=bestReport(spot.id);
+  var cur;
+  if(rep){
+    var meta=STATUS_META[rep.s];
+    cur='<span class="pill '+meta.cls+'">'+esc(meta.en)+' · '+esc(meta.zh)+'</span>'+
+      '<span class="rep-note">Crowd report · '+esc(timeAgo(rep.t))+' · Expires 30 min after reporting'+(rep.shared?'':' · On this device only')+
+      '<span>大家回報 · '+esc(timeAgo(rep.t))+' · 回報後 30 分鐘失效'+(rep.shared?'':' · 只在這台裝置')+'</span></span>';
+  }else{
+    cur='<span style="color:var(--muted)">No report in the last 30 min — be the first to share. 最近 30 分鐘沒有回報，來當第一個分享的人。</span>';
+  }
+  return '<div class="status"><div class="status-label">Live status · 即時狀態</div><div class="current">'+cur+'</div>'+
+    '<div class="sbtns">'+
+    '<button class="sbtn" type="button" data-id="'+esc(spot.id)+'" data-s="lots">Lots of spots<small>位子很多</small></button>'+
+    '<button class="sbtn" type="button" data-id="'+esc(spot.id)+'" data-s="few">Few left<small>快滿了</small></button>'+
+    '<button class="sbtn" type="button" data-id="'+esc(spot.id)+'" data-s="full">Full<small>已滿</small></button>'+
+    '</div></div>';
+}
+function cardHtml(spot){
+  var badgeCls=spot.priceKind==="free"?"b-free":"b-paid";
+  var html=
+    '<div class="city">'+esc(spot.cityEn)+' · '+esc(spot.cityZh)+'</div>'+
+    '<h2>'+esc(spot.nameEn)+'<span class="zh">'+esc(spot.nameZh)+'</span></h2>'+
+    '<p class="addr">'+esc(spot.address)+'</p>'+
+    '<span class="badge '+badgeCls+'">'+esc(spot.priceBadgeEn)+' · '+esc(spot.priceBadgeZh)+'</span>'+
+    '<p class="about">'+esc(spot.aboutEn)+'</p>'+
+    '<p class="about-zh">'+esc(spot.aboutZh)+'</p>'+
+    '<dl class="meta">'+
+    '<div><dt>Hours 營業</dt><dd>'+esc(spot.hoursEn)+'<span>'+esc(spot.hoursZh)+'</span></dd></div>'+
+    '<div><dt>Parking 停車</dt><dd>'+esc(spot.parkingEn)+'<span>'+esc(spot.parkingZh)+'</span></dd></div>'+
+    '<div><dt>Stay 停留</dt><dd>'+esc(spot.stayEn)+'<span>'+esc(spot.stayZh)+'</span></dd></div>'+
+    '</dl>'+
+    panelHtml(spot)+
+    noPanelHtml(spot)+
+    '<p class="note">'+esc(spot.tipEn)+'<span>'+esc(spot.tipZh)+'</span></p>'+
+    (spot.extraEn?'<p class="extra">'+esc(spot.extraEn)+'<span>'+esc(spot.extraZh||"")+'</span></p>':'')+
+    subLotsHtml(spot)+
+    reportHtml(spot)+
+    '<a class="waze" target="_blank" rel="noopener" href="'+esc(wazeHref(spot.lat,spot.lng))+'" aria-label="Navigate with Waze to '+esc(spot.nameEn)+'">Open in Waze · 用 Waze 導航</a>';
+  return html;
+}
+function render(){
+  var q=(document.getElementById("q").value||"").toLowerCase().trim();
+  var list=SPOTS.filter(function(spot){
+    if(filter==="free"&&spot.priceKind==="paid")return false;
+    if(filter==="paid"&&spot.priceKind==="free")return false;
+    if(!q)return true;
+    var hay=(spot.nameEn+" "+spot.nameZh+" "+spot.cityEn+" "+spot.cityZh+" "+spot.address).toLowerCase();
+    return hay.indexOf(q)>-1;
+  });
+  var suffix="";
+  if(reportsState==="loading")suffix=" · Loading reports… 載入回報中…";
+  if(reportsState==="error")suffix=" · Reports couldn't load — cards still work below. 回報載入失敗，下面的卡片仍可使用。";
+  document.getElementById("count").textContent=list.length+" of "+SPOTS.length+" spots · 顯示 "+list.length+" / "+SPOTS.length+" 個地點"+suffix;
+  var notice=document.getElementById("notice");
+  if(noticeText){notice.textContent=noticeText;notice.style.display="block";}else{notice.textContent="";notice.style.display="none";}
+  document.getElementById("empty").style.display=list.length?"none":"block";
+  var g=document.getElementById("grid");g.innerHTML="";
+  list.forEach(function(spot){
+    var card=document.createElement("article");card.className="card";card.id="card-"+spot.id;
+    card.innerHTML=cardHtml(spot);
+    g.appendChild(card);
+  });
+  var btns=document.querySelectorAll(".sbtn");
+  for(var i=0;i<btns.length;i++){btns[i].onclick=function(){postReport(this.getAttribute("data-id"),this.getAttribute("data-s"));};}
+}
+document.getElementById("q").addEventListener("input",render);
+var tabs=document.querySelectorAll(".tab");
+for(var t=0;t<tabs.length;t++){tabs[t].onclick=function(){
+  filter=this.getAttribute("data-filter");
+  for(var j=0;j<tabs.length;j++){tabs[j].setAttribute("aria-pressed",tabs[j]===this?"true":"false");}
+  render();
+};}
+render();
+fetchReports();
+setInterval(render,60000);
+setInterval(fetchReports,120000);
+</script>
+</body>
+</html>
